@@ -22,10 +22,17 @@ public class Huesped {
         this.reservas = new ArrayList<>();
     }
 
-    public void agregarReserva(Reserva reserva) {
-        if (reserva != null && !reservas.contains(reserva)) {
-            reservas.add(reserva);
+    public boolean agregarReserva(Reserva reserva) {
+        if (reserva == null || reservas.contains(reserva)) {
+            return false;
         }
+
+        reservas.add(reserva);
+        return true;
+    }
+
+    public boolean eliminarReserva(Reserva reserva) {
+        return reserva != null && reservas.remove(reserva);
     }
 
     public String getDocumentoIdentidad() {

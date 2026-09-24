@@ -195,6 +195,107 @@ public class Hotel {
         return null;
     }
 
+    // ---------------- ELIMINAR ----------------
+
+    public boolean eliminarHuesped(String documento) {
+        Huesped huesped = buscarHuesped(documento);
+
+        if (huesped == null) {
+            return false;
+        }
+
+        // No se elimina un huésped que todavía tenga reservas.
+        if (!huesped.getReservas().isEmpty()) {
+            return false;
+        }
+
+        return huespedes.remove(huesped);
+    }
+
+    public boolean eliminarHabitacion(int numero) {
+        Habitacion habitacion = buscarHabitacion(numero);
+
+        if (habitacion == null) {
+            return false;
+        }
+
+        // No se elimina una habitación que esté asociada a una reserva.
+        for (Reserva reserva : reservas) {
+            if (reserva != null && reserva.getHabitaciones().contains(habitacion)) {
+                return false;
+            }
+        }
+
+        for (int i = 0; i < habitaciones.length; i++) {
+            if (habitaciones[i] == habitacion) {
+                habitaciones[i] = null;
+
+                for (int j = 0; j < 7; j++) {
+                    matrizOcupacion[i][j] = "D";
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean eliminarReserva(int codigo) {
+        Reserva reserva = buscarReserva(codigo);
+
+        if (reserva == null) {
+            return false;
+        }
+
+        if (reserva.getHuesped() != null) {
+            reserva.getHuesped().eliminarReserva(reserva);
+        }
+
+        for (int i = 0; i < reservas.length; i++) {
+            if (reservas[i] == reserva) {
+                reservas[i] = null;
+                break;
+            }
+        }
+
+        // Volvemos a calcular estados y matriz con las reservas que siguen activas.
+        reconstruirOcupacion();
+        return true;
+    }
+
+    private void reconstruirOcupacion() {
+        // Primero todas las habitaciones vuelven a su estado disponible,
+        // excepto las que originalmente están en mantenimiento u ocupadas.
+        for (Habitacion habitacion : habitaciones) {
+            if (habitacion != null
+                    && habitacion.getEstado() == EstadoHabitacion.RESERVADA) {
+                habitacion.setEstado(EstadoHabitacion.DISPONIBLE);
+            }
+        }
+
+        for (int i = 0; i < matrizOcupacion.length; i++) {
+            for (int j = 0; j < 7; j++) {
+                matrizOcupacion[i][j] = "D";
+            }
+        }
+
+        for (Reserva reserva : reservas) {
+            if (reserva != null
+                    && reserva.getEstadoReserva() == EstadoReserva.CONFIRMADA) {
+
+                for (Habitacion habitacion : reserva.getHabitaciones()) {
+                    if (habitacion != null
+                            && habitacion.getEstado() == EstadoHabitacion.DISPONIBLE) {
+                        habitacion.setEstado(EstadoHabitacion.RESERVADA);
+                    }
+                }
+
+                actualizarMatrizConReserva(reserva);
+            }
+        }
+    }
+
     // ---------------- VALIDAR Y MOSTRAR LISTAS ----------------
 
     public String listarHuespedes() {

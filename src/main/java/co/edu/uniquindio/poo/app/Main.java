@@ -1,5 +1,5 @@
 /**
- * Este es el codigo del primer parcialde P1
+ * Este es el codigo del primer parcial de P1
  * @version 1.0
  * @author Juan Sebastian Salinas Luna
  * @fecha : 23/09/26
@@ -78,6 +78,10 @@ public class Main {
 
                 case 8:
                     consultarIngresos(hotel);
+                    break;
+
+                case 9:
+                    eliminar(hotel);
                     break;
 
                 case 0:
@@ -360,6 +364,105 @@ public class Main {
         }
     }
 
+    // ---------------- ELIMINAR ----------------
+
+    private static void eliminar(Hotel hotel) {
+
+        String tipo = seleccionarTipo("¿Qué desea eliminar?");
+
+        if (tipo == null) {
+            return;
+        }
+
+        switch (tipo) {
+            case "Huésped":
+                eliminarHuesped(hotel);
+                break;
+            case "Habitación":
+                eliminarHabitacion(hotel);
+                break;
+            case "Reserva":
+                eliminarReserva(hotel);
+                break;
+        }
+    }
+
+    private static void eliminarHuesped(Hotel hotel) {
+        String documento = leerTexto("Ingrese el documento del huésped que desea eliminar:");
+
+        Huesped huesped = hotel.buscarHuesped(documento);
+
+        if (huesped == null) {
+            mostrarError("No existe un huésped con ese documento.");
+            return;
+        }
+
+        if (!huesped.getReservas().isEmpty()) {
+            mostrarError("No se puede eliminar porque el huésped tiene reservas registradas.");
+            return;
+        }
+
+        if (hotel.eliminarHuesped(documento)) {
+            JOptionPane.showMessageDialog(null, "Huésped eliminado correctamente.");
+        } else {
+            mostrarError("No se pudo eliminar el huésped.");
+        }
+    }
+
+    private static void eliminarHabitacion(Hotel hotel) {
+        int numero = leerEnteroPositivo("Ingrese el número de la habitación que desea eliminar:");
+
+        Habitacion habitacion = hotel.buscarHabitacion(numero);
+
+        if (habitacion == null) {
+            mostrarError("No existe una habitación con ese número.");
+            return;
+        }
+
+        if (habitacion.getEstado() != EstadoHabitacion.DISPONIBLE) {
+            mostrarError("Solo se puede eliminar una habitación disponible.");
+            return;
+        }
+
+        if (hotel.eliminarHabitacion(numero)) {
+            JOptionPane.showMessageDialog(null, "Habitación eliminada correctamente.");
+        } else {
+            mostrarError("No se puede eliminar porque la habitación está asociada a una reserva.");
+        }
+    }
+
+    private static void eliminarReserva(Hotel hotel) {
+        int codigo = leerEnteroPositivo("Ingrese el código de la reserva que desea eliminar:");
+
+        Reserva reserva = hotel.buscarReserva(codigo);
+
+        if (reserva == null) {
+            mostrarError("No existe una reserva con ese código.");
+            return;
+        }
+
+        int confirmacion = JOptionPane.showConfirmDialog(
+                null,
+                "¿Está seguro de eliminar la reserva " + codigo + "?",
+                "Confirmar eliminación",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirmacion != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        if (hotel.eliminarReserva(codigo)) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Reserva eliminada correctamente.\n"
+                            + "Las habitaciones y la matriz fueron actualizadas."
+            );
+        } else {
+            mostrarError("No se pudo eliminar la reserva.");
+        }
+    }
+
     // ---------------- CONSULTA HUÉSPED ----------------
 
     private static void consultarHuesped(Hotel hotel) {
@@ -607,9 +710,10 @@ public class Main {
                         + "6. Actualizar matriz manualmente\n"
                         + "7. Mostrar reservas capicúa\n"
                         + "8. Calcular ingresos por fecha\n"
+                        + "9. Eliminar\n"
                         + "0. Salir",
                 0,
-                8
+                9
         );
     }
 
