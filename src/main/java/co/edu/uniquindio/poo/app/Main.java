@@ -1,5 +1,5 @@
 /**
- * Este es el codigo del primer parcial de P1
+ * Este es el codigo del primer parcialde P1
  * @version 1.0
  * @author Juan Sebastian Salinas Luna
  * @fecha : 23/09/26
